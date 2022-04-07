@@ -13,11 +13,18 @@ from paddle.optimizer import Adam
 logger = logging.getLogger(__name__)
 
 
+
 default_dtype = paddle.get_default_dtype()
 
+use_fast = True
 
-def TimeX(w, k, B, C, T, eps):
-    return F.conv1d(F.pad(k, pad=[T-1,0], data_format="NCL"), w.unsqueeze(1), groups=C, data_format="NCL") + eps
+if use_fast:
+    from src.timex import TimeX
+else:
+    class TimeX:
+        @staticmethod
+        def apply(w, k, B, C, T, eps):
+            return F.conv1d(F.pad(k, pad=[T-1,0], data_format="NCL"), w.unsqueeze(1), groups=C, data_format="NCL") + eps
 
 ########################################################################################################
 # RWKV: RWKV Time-mix + RWKV Channel-mix
@@ -152,9 +159,9 @@ class RWKV_TimeMix(nn.Layer):
         w = paddle.exp(self.time_w)
 
         ####################TimeX
-        wkv = TimeX(w, kv, B, C, T, 0)
+        wkv = TimeX.apply(w, kv, B, C, T, 0)
         # RWKV_K_EPS can be removed if the CUDA kernel sets 0/0 = 0 (I will do this later)
-        wk = TimeX(w, k, B, C, T, RWKV_K_EPS)
+        wk = TimeX.apply(w, k, B, C, T, RWKV_K_EPS)
 
         rwkv = F.sigmoid(r) * (wkv / wk).transpose([0,2,1])
         rwkv = self.output(rwkv)

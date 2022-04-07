@@ -3,13 +3,25 @@
 
 # TODO
 - [ ] 完善paddle版本训练代码（模型已经搭建了）。
-- [ ] 封装paddle自定义算子，实现depthwise convolution 1d。
+- [x] 封装paddle自定义算子，实现depthwise convolution 1d。
+
 
 # 使用
 - 1. 安装paddle
 - 2. 下载权重
 - 3. 转换权重，`python src/convert.py`。
 - 4. 测试生成效果，`python run.py`
+
+# 安装paddle自定义算子
+```bash
+# Tips：目前写死了参数。
+# T_MAX = 1024  # increase this if your ctx_len > 1024
+# B_GROUP_FORWARD = 4  # set to 8 for best performance
+# B_GROUP_BACKWARD = 2  # set to 2 for best performance
+cd cuda
+python setup.py install
+# 修改src/model_pd Line 19 选择是否使用fast
+```
 
 ```python
 Loading weights/enwik8-ppl1.65-6064-1024-RWKV-6-512-2022-03-25-21-05-13...

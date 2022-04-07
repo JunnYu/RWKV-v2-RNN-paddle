@@ -10,9 +10,15 @@ import paddle.nn as nn
 import paddle.nn.functional as F
 from paddle.nn.initializer import Assign #,Orthogonal
 from paddle.optimizer import Adam
+import numpy as np
 logger = logging.getLogger(__name__)
 
-
+def orthogonal(shape, gain=1):
+    flat_shape = (shape[0], np.prod(shape[1:]))
+    a = np.random.normal(0.0, 1.0, flat_shape)
+    u, _, v = np.linalg.svd(a, full_matrices=False)
+    q = u if u.shape == flat_shape else v
+    return q.reshape(shape) * gain
 
 default_dtype = paddle.get_default_dtype()
 
@@ -79,6 +85,7 @@ def RWKV_Init(module, config):  # fancy initialization of all lin & emb layer in
             elif gain > 0:
                 pass
                 # TODO
+                m.weight.set_value(paddle.to_tensor(orthogonal(m.weight.shape, gain), dtype=m.weight.dtype))
                 # orthogonal = Orthogonal(gain=gain)
                 # orthogonal(m.weight)
             else:

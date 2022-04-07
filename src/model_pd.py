@@ -336,7 +336,7 @@ if __name__ == "__main__":
     paddle.set_device("gpu")
     config = GPTConfig(vocab_size=6064, ctx_len=1024, model_type="RWKV", n_layer=6, n_embd=512)
     model = GPT(config)
-    model.load_dict(paddle.load("weights/enwik8-ppl1.65-6064-1024-RWKV-6-512-2022-03-25-21-05-13.pdparams"))
+    # model.load_dict(paddle.load("weights/enwik8-ppl1.65-6064-1024-RWKV-6-512-2022-03-25-21-05-13.pdparams"))
     pdx = paddle.arange(1024*4).reshape((4,1024)).astype("int64")
     with paddle.no_grad():
         pdout = model(pdx)[0]

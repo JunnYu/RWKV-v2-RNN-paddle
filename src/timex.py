@@ -1,11 +1,24 @@
 from paddle.autograd import PyLayer
-from paddle_custom_ops import TimeX_forward, TimeX_backward
+from paddle.utils.cpp_extension import load
 
 T_MAX = 1024  # increase this if your ctx_len > 1024
 B_GROUP_FORWARD = 4  # set to 8 for best performance
 B_GROUP_BACKWARD = 2  # set to 2 for best performance
 
-# 通过创建`PyLayer`子类的方式实现动态图Python Op
+timex_cuda = load(
+    name="timex",
+    sources=["cuda/timex_op.cc", "cuda/timex_cuda.cu"],
+    verbose=False,
+    extra_cuda_cflags=[
+        "--use_fast_math",
+        "--extra-device-vectorization",
+        f"-DTmax={T_MAX}",
+        f"-DBF={B_GROUP_FORWARD}",
+        f"-DBB={B_GROUP_BACKWARD}",
+    ],
+)
+
+
 class TimeX(PyLayer):
     @staticmethod
     def forward(ctx, w, k, B, C, T, eps):
@@ -19,7 +32,7 @@ class TimeX(PyLayer):
             and ctx.B % B_GROUP_BACKWARD == 0
         )
         ctx.save_for_backward(w, k)
-        wk = TimeX_forward(w, k, B, C, T, eps)
+        wk = timex_cuda.forward(w, k, B, C, T, eps)
         return wk
 
     @staticmethod
@@ -31,7 +44,5 @@ class TimeX(PyLayer):
             and ctx.B % B_GROUP_BACKWARD == 0
         )
         w, k = ctx.saved_tensor()
-        # 调用Paddle API自定义反向计算
-        gw, gk = TimeX_backward(w, k, gwk, ctx.B, ctx.C, ctx.T)
-        # forward只有一个Tensor输入，因此，backward只有一个输出。
+        gw, gk = timex_cuda.backward(w, k, gwk, ctx.B, ctx.C, ctx.T)
         return gw.sum(axis=0), gk

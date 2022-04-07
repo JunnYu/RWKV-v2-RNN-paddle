@@ -15,10 +15,16 @@ logger = logging.getLogger(__name__)
 
 def orthogonal(shape, gain=1):
     flat_shape = (shape[0], np.prod(shape[1:]))
-    a = np.random.normal(0.0, 1.0, flat_shape)
-    u, _, v = np.linalg.svd(a, full_matrices=False)
-    q = u if u.shape == flat_shape else v
-    return q.reshape(shape) * gain
+    flattened = np.random.normal(0.0, 1.0, flat_shape)
+    if flat_shape[0] < flat_shape[1]:
+        flattened = flattened.T
+    q, r = np.linalg.qr(flattened)
+    d = np.diag(r, 0)
+    ph = np.sign(d)
+    q *= ph
+    if flat_shape[0] < flat_shape[1]:
+        q = q.T
+    return q * gain
 
 default_dtype = paddle.get_default_dtype()
 

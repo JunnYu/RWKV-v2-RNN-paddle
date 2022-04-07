@@ -19,7 +19,7 @@ default_dtype = paddle.get_default_dtype()
 use_fast = True
 
 if use_fast:
-    from timex import TimeX
+    from src.timex import TimeX
 else:
     class TimeX:
         @staticmethod
@@ -301,9 +301,11 @@ class GPT(nn.Layer):
             {"params": [param_dict[pn]
                         for pn in sorted(list(no_decay))], "weight_decay": 0.0},
         ]
+        if train_config.grad_norm_clip > 0:
+            grad_clip = nn.ClipGradByGlobalNorm(clip_norm=train_config.grad_norm_clip)
 
         optimizer = Adam(
-            parameters=optim_groups, learning_rate=train_config.learning_rate, beta1=train_config.betas[0], beta2=train_config.betas[1], epsilon=train_config.eps)
+            parameters=optim_groups, learning_rate=train_config.learning_rate, beta1=train_config.betas[0], beta2=train_config.betas[1], epsilon=train_config.eps, grad_clip=grad_clip)
 
         return optimizer
 

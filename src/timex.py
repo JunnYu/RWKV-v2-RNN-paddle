@@ -7,7 +7,7 @@ B_GROUP_BACKWARD = 2  # set to 2 for best performance
 
 timex_cuda = load(
     name="timex",
-    sources=["cuda/timex_op.cc", "cuda/timex_cuda.cu"],
+    sources=["src/cuda/timex_op.cc", "src/cuda/timex_cuda.cu"],
     verbose=False,
     extra_cuda_cflags=[
         "--use_fast_math",

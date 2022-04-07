@@ -2,18 +2,22 @@
  paddle version RWKV-v2-RNN
 
 # TODO
-- [ ] 完善paddle版本训练代码（模型已经搭建了）。
+- [x] 完善paddle版本训练代码（模型已经搭建了）。
 - [x] 封装paddle自定义算子，实现depthwise convolution 1d。
 
+# 训练
+- 下载enwik8.zip, `wget https://data.deepai.org/enwik8.zip` 
+- 解压enwik8.zip, `unzip enwik8.zip`
+- 训练，`python train.py`
+- 如果编译自定义算子报错的话，"--use_fast_math", "--extra-device-vectorization" 注释掉。
 
-# 使用
-- 1. 安装paddle
-- 2. 下载权重
-- 3. 转换权重，`python src/convert.py`。
-- 4. 测试生成效果，`python run.py`
+# 测试
+- 安装paddle
+- 下载权重
+- 转换权重，`python convert.py`。
+- 测试生成效果，`python run.py`
 
-
-```python
+```bash
 Loading weights/enwik8-ppl1.65-6064-1024-RWKV-6-512-2022-03-25-21-05-13...
 
 Your prompt has 7 tokens.

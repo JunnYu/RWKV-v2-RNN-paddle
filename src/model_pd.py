@@ -19,7 +19,7 @@ default_dtype = paddle.get_default_dtype()
 use_fast = True
 
 if use_fast:
-    from src.timex import TimeX
+    from timex import TimeX
 else:
     class TimeX:
         @staticmethod
